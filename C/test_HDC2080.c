@@ -9,7 +9,7 @@ int main()
 
 	if(read_from_hdc2080(&temperature, &humidity)!=0) return 0;
 
-	printf("{ temperature : %f, humidity : %f }\n", temperature, humidity);
+	printf("{ temperature : %.1f, humidity : %.1f }\n", temperature, humidity);
 
 	return 0;
 }
