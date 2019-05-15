@@ -6,6 +6,9 @@
 #include <sys/ioctl.h>				//change slave
 #include <linux/i2c-dev.h>				
 
+#include <errno.h>
+#include <string.h>
+
 
 
 #define MFCT_ID 0x5449
@@ -30,8 +33,8 @@ static int file_i2c_handle =0;
 #define HDC2080_RESET_HEATER_ENABLE           (0x8)
 #define HDC2080_CONFIG_GO        (0x1)
 
-#define NANO_SECOND_MULTIPLIER  1000000                // 1 millisecond = 1,000,000 Nanoseconds
-const long INTERVAL_MS = 500 * NANO_SECOND_MULTIPLIER;
+#define NANO_MS_MULTIPLIER  1000000L;                // 1 millisecond = 1,000,000 Nanoseconds
+const int64_t INTERVAL_MS = NANO_MS_MULTIPLIER;
 
 //private function, we have to write 1 byte (address) to read from that location
 int read_from_address(uint8_t address, uint16_t* recv)
@@ -105,10 +108,18 @@ int setup_hdc2080()
 		return -1;
 	}
 	//sleep for 100ms
-	nanosleep((const struct timespec[]){{0, 100*INTERVAL_MS}}, NULL);
+	int i = nanosleep((const struct timespec[]){{0, 10*INTERVAL_MS}}, NULL);
+	if(i == -1 ) //nanosleep failed
+	{
+		printf("nano return = %i\n",i);
+		printf("Oh dear, nanosleep failed! %s\n", strerror(errno));
+	}
+
 
 	return 0;
 }
+
+
 int read_from_hdc2080(float* temperature, float* humidity)
 {
 	uint8_t buff[4] = {};
